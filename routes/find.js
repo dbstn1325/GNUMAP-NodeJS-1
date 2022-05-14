@@ -1,9 +1,14 @@
 const express = require('express')
 const router = express.Router()
 
-router.get('/:lat/:lon/:num', (req,res) => {
-    console.log(req.params)
-    return res.render('index.html', {title : 'hi'})
+
+router.post('/', (req,res) => {
+    console.log(req.body)
+    let pos = req.body
+    let lat = pos.lat
+    let lng = pos.lng
+    let num = pos.num
+    return res.render('pathInfo.html', {lat : lat, lng : lng, num : num})
 });
 
 

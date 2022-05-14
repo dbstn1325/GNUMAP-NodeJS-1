@@ -1,13 +1,14 @@
-{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<link rel="stylesheet" href="{% static 'css/map.css' %}">
-	<title>gnumap</title>
-	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>길 찾기 페이지</title>
+    <link rel="stylesheet" href="/css/pathSearch.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xxed2c734830ae4364975ef11e67a76e81"></script>
-	<script type="text/javascript">
+    <script type="text/javascript">
 		
 		// 지도 API의 변수들
 		var map;
@@ -23,7 +24,7 @@
 				center : new Tmapv2.LatLng('<%-lat %>', '<%-lng%>'), //장고 템플릿언어로 갑 치환
 				width : "100%", // 맵의 가로
 				height : "99vh", //맵의 세로
-				zoom : 18, // 맵을 얼마정도 확대할건지?
+				zoom : 15, // 맵을 얼마정도 확대할건지?
 				zoomControl : false, // 맵을 사용자가 확대시킬건지
 				scrollwheel : false,
 			});
@@ -68,14 +69,15 @@
 							var resultData = response.features;
 
 							//결과 출력
-							var tDistance = "총 거리 : "
+							var tDistance = 
 									+ ((resultData[0].properties.totalDistance) / 1000)
 											.toFixed(1) + "km,";
-							var tTime = " 총 시간 : "
+							var tTime = 
 									+ ((resultData[0].properties.totalTime) / 60)
 											.toFixed(0) + "분";
 							console.log(`소요시간 : ${tDistance}, 남은거리 : ${tTime}`)
-							$("#result").text(tDistance + tTime);
+							$("#time").text(tTime);
+                            $("#distance").text(tDistance);
 							
 							//기존 그려진 라인 & 마커가 있다면 초기화
 							if (resultdrawArr.length > 0) {
@@ -188,15 +190,30 @@
 	</script>
 </head>
 <body onload="initTmap();">
-	
-		<!-- 190430 기존 지도를 모두 이미지 처리 위해 주석 처리 S -->
+    <header>
+        <a href="#" class="main_page">&lt; 메인</a>
+        <div class="building_title">30동</div>
+    </header>
+    <div>
+        <!-- 190430 기존 지도를 모두 이미지 처리 위해 주석 처리 S -->
 		<div id="map_wrap" class="map_wrap3">
-			<div id="map_div"></div>
+			<div id="map_div" class="mapImage"></div>
 		</div>
-
-        <script>
-            console.log("<%-lat %>", "<%-lng%>")
-        </script>
-
+        <a href="#"><img src="./img/navi.png" alt="navi.png" class="naviImage"></a>
+    </div>
+    <div class="InfoBox">
+        <img src="./img/cs.png" alt="cs.png" class="csImage">
+        <div>
+            <div class="InfoBox_content_header">
+                <div class="title">컴퓨터과학관 30동</div>    
+                <img src="./img/heart.png" alt="heart.png" class="heartImage">
+            </div>
+            <div class="InfoBox_content_body">
+                <span class="time">소요시간 </span><span id="time"></span>
+                <span class="distance">거리 </span><span id="distance"></span>
+                <div class="address">경남 진주시 진주대로 501 30동</div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

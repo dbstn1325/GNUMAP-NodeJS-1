@@ -1,0 +1,84 @@
+header {
+    margin-top: 15px;
+}
+
+.main_page {
+    margin-left: 7px;
+    text-decoration: none;
+    position: absolute;
+}
+
+.building_title {
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+}
+
+.mapImage {
+    margin-top: 15px;
+    position: absolute;
+    z-index: -100;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.InfoBox {
+    display: flex;
+    background-color: white;
+    width: calc(100% - 30px);
+    height: 150px;
+    position: fixed;
+    bottom: 10px;
+    border-radius: 20px;
+    margin: 0px 15px 0px 15px;
+}
+
+.csImage {
+    width: 110px;
+    height: 130px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.naviImage {
+    position: fixed;
+    bottom: 160px;
+    right: 20px;
+}
+
+.InfoBox_content_header {
+    display: flex;
+    margin: 15px 0 0 14px;
+    font-size: 1.16rem;
+}
+
+.InfoBox_content_header .title {
+    font-weight: bold;
+}
+
+.heartImage {
+    margin-left: 5px;
+    width: 15px;
+    height: 15px;
+}
+
+.InfoBox_content_body {
+    margin: 7px 0 0 14px;
+}
+
+.InfoBox_content_body .time {
+    color: #007aff;
+}
+
+.InfoBox_content_body .distance {
+    margin-left: 10px;
+    color: #007aff;
+}
+
+.InfoBox_content_body .address {
+    margin-top: 10px;
+}

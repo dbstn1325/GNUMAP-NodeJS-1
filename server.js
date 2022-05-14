@@ -2,6 +2,11 @@
 const { render } = require('ejs');
 const express = require('express');
 const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded());
+
+// Router 설정
 const find = require('./routes/find.js')
 app.use('/find', find)
 
@@ -22,3 +27,4 @@ app.use(express.static(__dirname + '/public'));
 app.get('/', (req,res)=>{
     return res.render('main.html', {title : 'hi'})
 });
+
