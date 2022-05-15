@@ -59,9 +59,9 @@ header {
 /* convenient */
 .convenient-list {
   padding-left: 0.8rem;
-  overflow-y: auto;
+  overflow: auto;
   width: 100%;
-  max-height: 54rem;
+  height: 47rem;
   /* max-height: 100%; */
 }
 
