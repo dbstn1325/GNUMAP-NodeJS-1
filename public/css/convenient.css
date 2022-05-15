@@ -1,0 +1,107 @@
+@font-face {
+  font-family: "AppleSDGothicNeoM";
+  src: url("/public/fonts/AppleSDGothicNeoM.woff") format("woff");
+}
+
+body {
+  font-family: "AppleSDGothicNeoM";
+  overflow: hidden;
+  touch-action: none;
+  width: 100%;
+  height: 100%;
+}
+
+/* header */
+header {
+  display: flex;
+  background-color: white;
+  position: relative;
+}
+
+.page-move {
+  padding-left: 0.2em;
+  text-decoration: none;
+}
+
+.page-title {
+  font-weight: 900;
+  left: 50%;
+  text-align: center;
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* intro */
+.intro-wrap {
+  padding-top: 0.7rem;
+  position: relative;
+}
+
+.intro-wrap img {
+  width: 100%;
+  height: 15vh;
+  vertical-align: middle;
+}
+
+.intro-title {
+  text-align: center;
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.4rem;
+  font-weight: 900;
+  color: white;
+}
+
+/* convenient */
+.convenient-list {
+  padding-left: 0.8rem;
+  overflow-y: auto;
+  width: 100%;
+  max-height: 54rem;
+  /* max-height: 100%; */
+}
+
+.convenient-info {
+  margin-top: 0.7rem;
+  padding-bottom: 0.2rem;
+  height: 10rem;
+  display: flex;
+  padding-top: 0.2rem;
+  border-bottom: 1px solid gainsboro;
+}
+
+.convenient-info img {
+  width: 10rem;
+  height: 9.5rem;
+  border-radius: 1.5rem;
+}
+
+.convenient-info-detail {
+  width: 100%;
+  padding-left: 1rem;
+  margin-top: 0.3rem;
+}
+
+.convenient-info-detail span {
+  display: grid;
+}
+
+.convenient-title {
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.convenient-address {
+  font-size: 0.75rem;
+  color: grey;
+}
+
+.convenient-distance {
+  padding-top: 8.2em;
+  font-size: 0.7rem;
+  color: grey;
+}
