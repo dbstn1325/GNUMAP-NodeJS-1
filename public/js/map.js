@@ -24,7 +24,9 @@
         function onGeoError(){
             alert("Can't find you. No weather for you.");
         }
-        navigator.geolocation.getCurrentPosition(onGeoOk,onGeoError);
+
+        const options = { enableHighAccuracy: true, maximumAge: 0, timeout: Infinity };
+        navigator.geolocation.getCurrentPosition(onGeoOk,onGeoError,options);
        
 
     }

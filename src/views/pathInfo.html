@@ -17,16 +17,16 @@
       var resultdrawArr = [];
 
       // 초기 맵을 띄워준다.
-      function initTmap() {
+     function initTmap() {
         // 1. 지도 띄우기
-        map = new Tmapv2.Map("map_div", {
-          center: new Tmapv2.LatLng("<%-lat %>", "<%-lng%>"), //장고 템플릿언어로 갑 치환
+        map =  new Tmapv2.Map("map_div", {
+          center: new Tmapv2.LatLng("35.153025 ", "128.102369"), //장고 템플릿언어로 갑 치환
           width: "100%", // 맵의 가로
           height: "99vh", //맵의 세로
           zoom: 15, // 맵을 얼마정도 확대할건지?
-          zoomControl: false, // 맵을 사용자가 확대시킬건지
+          zoomControl: true, // 맵을 사용자가 확대시킬건지
           scrollwheel: false,
-        });
+        }); 
 
         // 2. 시작, 도착 심볼찍기
         // 시작
@@ -194,6 +194,7 @@
         });
         resultdrawArr.push(polyline_);
       }
+      initTmap();
     </script>
   </head>
   <body onload="initTmap();">
@@ -204,7 +205,7 @@
     <div>
       <!-- 190430 기존 지도를 모두 이미지 처리 위해 주석 처리 S -->
       <div id="map_wrap" class="map_wrap3">
-        <div id="map_div" class="mapImage"></div>
+        <div id="map_div"></div>
       </div>
       <a href="#"
         ><img src="./img/navi.png" alt="navi.png" class="naviImage"

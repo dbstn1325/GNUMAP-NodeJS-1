@@ -26,20 +26,20 @@ app.use(morgan('dev'));
 
 
 
-//세션
-app.use(session({
-    secret: "secret key",
-    resave: false,
-    saveUninitialized: true,
-    store: new MYSQLStore({
-      host: "localhost",
-      port: 3306,
-      user: "root",
-      password: "1234",
-      database: "convenience_db"
-    })
-  })
-);
+// //세션
+// app.use(session({
+//     secret: "secret key",
+//     resave: false,
+//     saveUninitialized: true,
+//     store: new MYSQLStore({
+//       host: "localhost",
+//       port: 3306,
+//       user: "root",
+//       password: "1234",
+//       database: "convenience_db"
+//     })
+//   })
+// );
 
 
 
@@ -47,6 +47,6 @@ app.use(session({
 
 //라우터 설정
 app.use("/", rootRouter);
-app.use("/api", apiRouter);
+app.use("/find", apiRouter);
 
 module.exports = app;
