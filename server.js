@@ -1,16 +1,10 @@
 const express = require("express");
-const apiRouter = require("./src/routers/apiRouter.js");
 const morgan = require("morgan");
 const logger = morgan("dev");
 const { render } = require("ejs");
-const rootRouter = require("./src/routers/rootRouter");
-
-const MYSQLStore = require('express-mysql-session');
-const session = require('express-session');
-
-
+const PORT = 8000;
+const mysql = require("mysql2");
 const app = express();
-
 
 // view 경로 설정
 app.set("views", __dirname + "/src/views");
@@ -26,27 +20,45 @@ app.use(morgan('dev'));
 
 
 
-// //세션
-// app.use(session({
-//     secret: "secret key",
-//     resave: false,
-//     saveUninitialized: true,
-//     store: new MYSQLStore({
-//       host: "localhost",
-//       port: 3306,
-//       user: "root",
-//       password: "1234",
-//       database: "convenience_db"
-//     })
-//   })
-// );
 
 
+const db = mysql.createConnection({
+    host: "gnumap-mysql",
+    user: "root",
+    password: "gnumappbl",
+    database: "gnumap",
+});
 
+db.connect((err)=> {
+  if(err) {
+      console.log(err.message);
+  }
+});
 
+//서버 실행: npm run start
+app.listen(PORT, () => {
+  console.log(`listenling ${PORT}`);
+});
 
+// 'INSERT INTO building VALUES(?,?,?,?,?,?)', params,
+// const params = [1, 'cu 편의점', "t", "t", "t", "t"]
+// select * from building
+// db.query('UPDATE building SET building_image = "/img/30.jpg" where building_num=1',
 //라우터 설정
-app.use("/", rootRouter);
-app.use("/find", apiRouter);
+app.get("/", (req, res) => {
+    //delete from building
+    // const params = [501, '수의대', "/img/수의대.jpg", "경상남도 진주시 진주대로 501", "35.15041826233098", "128.09719375374283"]
+    // db.query('INSERT INTO building VALUES(?,?,?,?,?,?)', params,
+    db.query('select * from building',
+      function(err,result, filed) {
+        console.log(result);
+    });
+    return res.render("main.html", { title: "hi" });
+  });
 
-module.exports = app;
+app.get("/find/:lat/:lng/:building_num", (req, res) => {
+    let { lat, lng } = req.params;
+    console.log('lat',lat,'lng',lng);
+    return res.render("pathInfo.html", { lat: lat, lng: lng});
+  });
+
