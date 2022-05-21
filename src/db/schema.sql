@@ -26,6 +26,7 @@ CREATE TABLE `like` (
     status CHAR(1) NOT NULL,
     FOREIGN KEY(building_num) REFERENCES building(building_num),
     FOREIGN KEY(`key`) REFERENCES user(`key`)
+    FOREIGN KEY(`key`) REFERENCES convenient(convenient_id),
 );
 
 CREATE TABLE search_history (
@@ -33,7 +34,16 @@ CREATE TABLE search_history (
     `KEY` INT NOT NULL,
     history_contents VARCHAR(45) NOT NULL,
     isDeleted CHAR(1) NOT NULL,
-    FOREIGN KEY(`key`) REFERENCES user(`key`)
+);
+
+CREATE TABLE convenient (
+    convenient_id INT PRIMARY KEY NOT NULL,
+    convenient_name VARCHAR(64) NOT NULL,
+    convenient_image TEXT NOT NULL,
+    convenient_phone TEXT NOT NULL,
+    convenient_lat TEXT NOT NULL,
+    convenient_lng TEXT NOT NULL,
+    category VARCHAR(32) NOT NULL,
 );
 
 -------------------

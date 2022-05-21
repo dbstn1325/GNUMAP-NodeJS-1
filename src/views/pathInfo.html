@@ -20,26 +20,28 @@
      function initTmap() {
         // 1. 지도 띄우기
         map =  new Tmapv2.Map("map_div", {
-          center: new Tmapv2.LatLng("35.153025 ", "128.102369"), //장고 템플릿언어로 갑 치환
+          center: new Tmapv2.LatLng("<%-lat %>", "<%-lng %>"), //장고 템플릿언어로 갑 치환
           width: "100%", // 맵의 가로
-          height: "99vh", //맵의 세로
+          height: "100vh", //맵의 세로
           zoom: 17, // 맵을 얼마정도 확대할건지?
           zoomControl: true, // 맵을 사용자가 확대시킬건지
           scrollwheel: true,
         }); 
 
         // 2. 시작, 도착 심볼찍기
-        // 시작
+
+        // (1) 시작
         marker_s = new Tmapv2.Marker({
           position: new Tmapv2.LatLng("<%-lat %>", "<%-lng%>"),
+          
           icon: "http://tmapapi.sktelecom.com/upload/tmap/marker/pin_r_m_s.png",
           iconSize: new Tmapv2.Size(24, 38),
           map: map,
         });
 
-        // 도착
+        // (2) 도착
         marker_e = new Tmapv2.Marker({
-          position: new Tmapv2.LatLng(35.1544492, 128.0982524),
+          position: new Tmapv2.LatLng("<%-tlat %>", "<%-tlng %>"),
           icon: "http://tmapapi.sktelecom.com/upload/tmap/marker/pin_r_m_e.png",
           iconSize: new Tmapv2.Size(24, 38),
           map: map,
@@ -54,8 +56,8 @@
             appKey: "l7xxed2c734830ae4364975ef11e67a76e81",
             startX: "<%-lng%>",
             startY: "<%-lat %>",
-            endX: "128.0982524 ",
-            endY: "35.1544492",
+            endX: "<%-tlng %> ",
+            endY: "<%-tlat %>",
             reqCoordType: "WGS84GEO",
             resCoordType: "EPSG3857",
             startName: "출발지",
@@ -73,7 +75,8 @@
             console.log(`소요시간 : ${tDistance}, 남은거리 : ${tTime}`);
             $("#time").text(tTime);
             $("#distance").text(tDistance);
-
+            msg = `${tDistance}${tTime}`;
+            JavaScriptChannel.postMessage(msg);
             //기존 그려진 라인 & 마커가 있다면 초기화
             if (resultdrawArr.length > 0) {
               for (var i in resultdrawArr) {
@@ -193,6 +196,7 @@
           map: map,
         });
         resultdrawArr.push(polyline_);
+
       }
       initTmap();
     </script>
@@ -208,19 +212,7 @@
         ><img src="./img/navi.png" alt="navi.png" class="naviImage"
       /></a>
     </div>
-    <div class="InfoBox">
-      <img src="./img/cs.png" alt="cs.png" class="csImage" />
-      <div>
-        <div class="InfoBox_content_header">
-          <div class="title">컴퓨터과학관 30동</div>
-          <img src="./img/heart.png" alt="heart.png" class="heartImage" />
-        </div>
-        <div class="InfoBox_content_body">
-          <span class="time">소요시간 </span><span id="time"></span>
-          <span class="distance">거리 </span><span id="distance"></span>
-          <div class="address">경남 진주시 진주대로 501 30동</div>
-        </div>
-      </div>
+  
     </div>
   </body>
 </html>
