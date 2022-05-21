@@ -7,6 +7,7 @@ const mysql = require("mysql2");
 const app = express();
 const fetch = require("node-fetch");
 const http = require('http');
+const { type } = require("os");
 
 
 
@@ -20,8 +21,8 @@ app.use(express.json());
 app.use(express.urlencoded());
 // 기본 path를 /public으로 설정(css, javascript 등의 파일 사용을 위해)
 app.use(express.static(__dirname + "/public"));
+// 전송 로그를 기록
 app.use(morgan('dev'));
-
 
 
 
@@ -47,46 +48,32 @@ app.listen(PORT, () => {
   console.log(`listenling ${PORT}`);
 });
 
-// 'INSERT INTO building VALUES(?,?,?,?,?,?)', params,
-// const params = [1, 'cu 편의점', "t", "t", "t", "t"]
-// select * from building
-// db.query('UPDATE building SET building_image = "/img/30.jpg" where building_num=1',
-//delete from building
-// const params = [501, '수의대', "/img/수의대.jpg", "경상남도 진주시 진주대로 501", "35.15041826233098", "128.09719375374283"]
-// db.query('INSERT INTO building VALUES(?,?,?,?,?,?)', params,
-// db.query('ALTER TABLE convenient add category varchar(30) not null',
-// db.query('show full columns from convenient',
 
 
 //라우터 설정
 app.get("/", (req, res) => {
-  db.query('select * from convenient',
+  const num = "30";
+  const num2 = "컴퓨터";
+  db.query(`SELECT * FROM building WHERE building_num = ${num} OR building_name LIKE '%"${num2}"%'`,
     function (err, result, filed) {
       console.log(result);
     });
   return res.render("main.html", { title: "hi" });
 });
 
-// app.get("/find/:lat/:lng/:building_num", (req, res) => {
-//     let { lat, lng } = req.params;
-//     console.log('lat',lat,'lng',lng);
-//     return res.render("pathInfo.html", { lat: lat, lng: lng});
-//   });
 
-app.get("/find/:lat/:lng/:num", (req, res) => {
+app.post("/find", (req, res) => {
+  const { lat, lng } = req.body;
+  let { num } =req.body;
+  num = num.replace(" ","");
+  console.log(`find 도착: ${num}`);
 
-  const { lat, lng, num } = req.params;
-
+  const query = [num, "%" + num +"%"];
   try {
-    const selectQuery = db.query(`SELECT * FROM building WHERE building_num = ${num}`,
+    const selectQuery = db.query('SELECT * FROM building WHERE building_num = ? OR building_name LIKE ?; ', query, 
       (err, result, filed) => {
         if (result == 0) {
-          return res.send(
-            `<script>
-              alert('제공하지 않는 경로입니다.');
-              location.href="/";
-            </script>`
-          );
+          return res.send("error");
         }
         if (err) {
           console.log(err);
@@ -106,94 +93,184 @@ app.get("/find/:lat/:lng/:num", (req, res) => {
 });
 
 
-app.post("/find", (req, res)=> {
-  const { lat, lng, num } = req.body;
-  
+
+
+
+
+
+
+
+
+app.post('/getInfoConvenient', (req, res) => {
+  const { curLat, curLng, number } = req.body;
+  let destLat = []; let destLng = []; let destName = [];
+  const convenientCategory = {
+    0: "편의점",
+    1: "ATM",
+    2: "우체국",
+    3: "문구점",
+    4: "AED",
+    5: "딸기방",
+    6: "식당",
+    7: "프린터",
+    8: "카페",
+    9: "헌혈의집",
+    };
+
   try {
-    const selectQuery = db.query(`SELECT * FROM building WHERE building_num = ${num}`,
+    // const selectQuery = db.query(`SELECT * FROM convenient WHERE category = convenientCategory[${number}}]`,
+    const selectQuery = db.query(`SELECT * FROM convenient WHERE category = convenientCategory[0]`,
       (err, result, filed) => {
         if (result == 0) {
-          return res.send(
-            `<script>
-              alert('제공하지 않는 경로입니다.');
-              location.href="/";
-            </script>`
-          );
+          return res.send("error");
+
         }
         if (err) {
           console.log(err);
         }
         return result.map((found) => {
-          console.log(found);
-          res.render("pathInfo.html", { lat: lat, lng: lng, tlat: found.building_lat, tlng: found.building_lag });
-        }
-        );
+          destLat.push(found.convenient_lat);
+          destLng.push(found.convenient_lng);
+          destName.push(found.convenient_name);
+        });
+
       });
   } catch {
-    (err) => { 
+    (err) => {
       return console.log(err);
     };
   }
 
-});
-
-//1.앱에서 위치 전송
-app.post("/curLocation", (req,res) =>{
-  const {lat, lng} = req.body;
-
-  //현재 위치 반환
-  return lat, lng;
-})
-
-
-app.get("/convenience", async(req, res)=> {
-  //2.현재 위치 위도,경도 호출
-  // const response = await fetch("currLocation", {
-  //   method: "POST"
-  // }).then(
-  // (response)=> {
-  //   const lat = response.lat;
-  //   const lng = response.lng;
-  // };
-  
-  const lat = 35.15767521048202;
-  const lng = 128.10108675307046;
-  const name = "편의점";
   const info = {};
-  const distance = 0;
+  const url = 'https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1';
+  const options = {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      appKey: 'l7xxfdc75c1509a74ecdba02bf5e024ee9d5'
+    },
+    body: JSON.stringify({
+      angle: 0,
+      speed: 0,
+      reqCoordType: 'WGS84GEO',
+      searchOption: '0',
+      resCoordType: 'WGS84GEO',
+      sort: 'index',
+      endName: `${number}`,
+      startX: curLng,
+      startY: curLat,
+      endX: destLng,
+      endY: destLat,
+      startName: `${destName}`,
+    })
+  };
 
-  return res.render('convenient2.html');
-  //출발지점 고정.   에   모든 편의시설의 위도,경도
+  fetch(url, options)
+    .then(res => res.json())
+    .then((json) => {
+      const {
+        properties: {
+          totalDistance: distance,
+          totalTime: time,
+        }
+      } = json.features[0];
+      info["distance"] = `${distance}m`;
+      info["time"] = `${Math.round(time / 60)}분`;
+      const jsonInfo = JSON.stringify(info);
+      return res.send(jsonInfo);
 
-  // try {
-  //   const selectQuery = db.query(`SELECT * FROM convenient WHERE category= "${name}" `,
-  //     (err, result, filed) => {
-  //       if (result == 0) {
-  //         return res.send(
-  //           `<script>
-  //             alert('근처 편의점 정보가 존재하지 않습니다.');
-  //             location.href="/";
-  //           </script>`
-  //         );
-          
-  //       }
-  //       if (err) {
-  //         console.log(err);
-  //       }
-  //       return res.render("convenient2.html");
-  //       // return result.map((found) => {
-  //       //   res.render("convenient2.html");
-  //       //   // res.render("pathInfo2.html", {lat: found.convenient_lat, lng: found.convenient_lng});
-  //       //   // console.log(found.convenient_name,found.convenient_lat, found.convenient_lng);
-  //       // });
-        
-  //     });
-  // } catch {
-  //   (err) => { 
-  //     return console.log(err);
-  //   };
-  // }
-  
-  
+
+      // return res.send(`${distance}m,${Math.round(time/60)}분`);
+    })
+    .catch(err => console.error('error:' + err));
 });
 
+
+
+app.post('/getInfoBuilding', async (req, res) => {
+  const { curLat, curLng } = req.body;
+  let { num } =req.body;
+
+  //안드로이드는 애뮬레이터 상 기본 default 위치(curLat, curLng)가 미국으로 되어있음 => 직접 휴대폰에서 실시해야 정확한 값 도출함
+  // console.log(curLat, curLng, num); 
+  let destLat = "";
+  let destLng = "";
+  num = num.replace(" ","");
+
+  console.log(`getInfoBuilding 도착: ${num}`)
+  const query = [num, "%" + num +"%"];
+
+  try {
+    const selectQuery = db.query('SELECT * FROM building WHERE building_num = ? OR building_name LIKE ?; ', query, 
+      (err, result, filed) => {
+        if (result == 0) {
+          return res.send(
+            `<script>
+              alert('근처 편의점 정보가 존재하지 않습니다.');
+              location.href="/";
+            </script>`
+          );
+        }
+        if (err) {
+          console.log(err);
+        }
+        result.map((found) => {
+          destLat = found.building_lat;
+          destLng = found.building_lag;
+          console.log(`안임 ${destLng}`);
+        })
+
+        console.log(`밖임 ${destLng}`);
+        const info = {};
+        const url = 'https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1';
+        const options = {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            appKey: 'l7xxfdc75c1509a74ecdba02bf5e024ee9d5'
+          },
+          body: JSON.stringify({
+            angle: 0,
+            speed: 0,
+            reqCoordType: 'WGS84GEO',
+            searchOption: '0',
+            resCoordType: 'WGS84GEO',
+            sort: 'index',
+            startX: curLng,
+            startY: curLat,
+            endX: destLng,
+            endY: destLat,
+            startName: 'ss',
+            endName: `${num}`,
+          })
+        };
+        
+        fetch(url, options)
+          .then(res => res.json())
+          .then((json) => {
+            console.log(`제이슨: ${json}`);
+            const {
+              properties: {
+                totalDistance: distance,
+                totalTime: time,
+              }
+            } = json.features[0];
+
+            console.log(distance, time);
+            info["distance"] = `${distance}m`;
+            info["time"] = `${Math.round(time / 60)}분`;
+            const jsonInfo = JSON.stringify(info);
+
+            return res.send(jsonInfo);
+            // return res.send(`${distance}m,${Math.round(time/60)}분`);
+          })
+          .catch(err => console.error('error:' + err));
+      });
+  } catch {
+    (err) => {
+      return console.log(err);
+    };
+  }
+})
