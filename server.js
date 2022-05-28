@@ -9,6 +9,7 @@ const fetch = require("node-fetch");
 const http = require('http');
 const { type } = require("os");
 const sort = require('sortjson');
+const { errorMonitor } = require("events");
 
 
 // view 경로 설정
@@ -51,33 +52,28 @@ app.listen(PORT, () => {
 // 35.15386975661034,128.09749798808684
 
 //라우터 설정
-app.get("/", (req, res) => {
-  const num = "30";
-  const num2 = "컴퓨터";
-  // db.query(`SELECT * FROM building WHERE building_num = ${num} OR building_name LIKE '%"${num2}"%'`,
-  // db.query('UPDATE building SET building_lat="35.15371879778801", building_lag="128.09774562373815" where building_num=3 ',
-  db.query('select * from building',
-    function (err, result, filed) {
-      console.log(filed);
-      console.log(result);
-    });
-  return res.render("main.html", { title: "hi" });
+app.get("/gnumap", (req, res) => {
+  return res.render("gnumap.html");
 });
 
-
+app.get("/", (req,res) => {
+  db.query('SELECT * FROM convenient', 
+  (err,result, filed) => {
+    return console.log(result);
+  }
+  );
+});
 
 
 app.post("/find", (req, res) => {
   const { lat, lng } = req.body;
   let { num } = req.body;
-
   num = num.replace(" ", "");
-  num = num.replace("동", "");
   console.log(`find 도착: ${num}`);
 
-  const query = [num, "%" + num + "%"];
+  const params = [num, "%" + num + "%"];
   try {
-    const selectQuery = db.query('SELECT * FROM building WHERE building_num = ? OR building_name LIKE ?; ', query,
+    const selectQuery = db.query('SELECT * FROM building WHERE building_num = ? OR building_name LIKE ?; ', params,
       (err, result, filed) => {
         if (result == 0) {
           return res.send("error");
@@ -96,7 +92,33 @@ app.post("/find", (req, res) => {
       return console.log(err);
     };
   }
+});
 
+// db에서 이미지, 건물 번호, 건물 이름 가져옴
+app.post('/getBuildingData', async (req, res) => {
+  // TODO: req.body 데이터 받아서 쿼리문 만들기
+  let { num } = req.body;
+
+  try {
+    const selectQuery = db.query('SELECT building_num, building_name, building_image FROM building WHERE building_num = ? OR building_name LIKE ?; ', params,
+      (err, result, filed) => {
+        if (result == 0) {
+          return res.send("error");
+        }
+        if (err) {
+          console.log(err);
+        }
+        return result.map((found) => {
+          // console.log(found);
+          res.send(result);
+        }
+        );
+      });
+  } catch {
+    (err) => {
+      return console.log(err);
+    };
+  }
 });
 
 
@@ -115,8 +137,7 @@ app.post("/find", (req, res) => {
 app.post('/getInfoBuilding', async (req, res) => {
   const { curLat, curLng } = req.body;
   let { num } = req.body;
-  num = num.replace("동", "");
-  if (num.length > 10){
+  if (num.length > 10) {
     return res.send(
       `<script>
         alert('근처 편의점 정보가 존재하지 않습니다.');
@@ -136,31 +157,32 @@ app.post('/getInfoBuilding', async (req, res) => {
 
   function getData() {
     return new Promise(function (resolve, reject) {
-    const selectQuery = db.query('SELECT * FROM building WHERE building_num LIKE ? OR building_name LIKE ?; ', query,
-      (err, result, filed) => {
-        if (result == 0) {
-          return res.send(
-            `<script>
+      const selectQuery = db.query('SELECT * FROM building WHERE building_num LIKE ? OR building_name LIKE ?; ', query,
+        (err, result, filed) => {
+          if (result == 0) {
+            return res.send(
+              `<script>
               alert('근처 편의점 정보가 존재하지 않습니다.');
               location.href="/";
             </script>`
-          );
-        }
-        if (err) {
-          return console.log(err);//
-        }
-        result.map((found) => {
-          destLat = found.building_lat;
-          destLng = found.building_lag;
-          console.log(`출발지안: ${curLat}, ${curLng}`);
-          console.log(`목적지안: ${destLat}, ${destLng}`);
+            );
+          }
+          if (err) {
+            return console.log(err);//
+          }
+          result.map((found) => {
+            destLat = found.building_lat;
+            destLng = found.building_lag;
+            console.log(`출발지안: ${curLat}, ${curLng}`);
+            console.log(`목적지안: ${destLat}, ${destLng}`);
+          });
+          destInfo['destLat'] = destLat;
+          destInfo['destLng'] = destLng;
+          resolve(destInfo);
         });
-        destInfo['destLat'] = destLat;
-        destInfo['destLng'] = destLng;
-        resolve(destInfo);
-      });
     });
   }
+
   getData().then(function (resolvedData) {
     console.log(`출발지안: ${curLat}, ${curLng}`);
     console.log(`목적지안: ${destLat}, ${destLng}`);
@@ -188,14 +210,14 @@ app.post('/getInfoBuilding', async (req, res) => {
         endName: `${num}`,
       })
     };
-    
+
 
     fetch(url, options)
       .then(res => res.json())
       .then((json) => {
         console.log(`제이슨: ${json.features[0]}`);
 
-       
+        console.log(res);
         const {
           properties: {
             totalDistance: distance,
@@ -203,6 +225,9 @@ app.post('/getInfoBuilding', async (req, res) => {
           }
         } = json.features[0];
 
+        if (distance > 30000) {
+          return res.send(JSON.stringify({ 'distance': null, 'time': null }));
+        }
 
         console.log(distance, time);
         info["distance"] = `${distance}m`;
@@ -223,15 +248,18 @@ app.post('/getInfoBuilding', async (req, res) => {
 
 
 app.post('/getreviseInfo', async (req, res) => {
-  const {building_num, request_building_name, request_building_location, request_revise } = req.body;
-
+  const { building_num, request_building_name, request_building_location, request_revise } = req.body;
+  console.log(building_num, request_building_name);
   try {
     // const selectQuery = db.query('CREATE TABLE request (request_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT, building_num INT NOT NULL, request_buliding_name VARCHAR(128) NOT NULL, request_building_location TEXT NOT NULL, request_revise TEXT NOT NULL, FOREIGN KEY(building_num) REFERENCES building(building_num))',
-     const selectQuery = db.query(`INSERT INTO request VALUES(NULL, '${request_building_name}', '${request_building_location}', '${request_revise}', '${building_num}')`,  
-    // const selectQuery = db.query('SELECT * FROM request',
+    const selectQuery = db.query(`INSERT INTO request VALUES(NULL, '${request_building_name}', '${request_building_location}', '${request_revise}', '${building_num}')`,
+      // const selectQuery = db.query('SELECT * FROM request',
       (err, result, filed) => {
         if (result == 0) {
           return res.send("error");
+        }
+        if (request_building_name.length == 0 || building_num.length == 0 || request_building_location.length == 0 || request_revise.length == 0) {
+          return res.send(error);
         }
         if (err) {
           console.log(err);
@@ -240,13 +268,11 @@ app.post('/getreviseInfo', async (req, res) => {
       })
   } catch {
     (err) => {
-      return console.log(err);
+      return console.log(err)
     };
   }
-
   res.send('recieved');
 })
-
 
 
 
@@ -297,14 +323,19 @@ app.post('/getInfoConvenient', async (req, res) => {
             };
           };
           resolve(convenient_info);
-        });
-    })
+        })
+    }).catch((err) => {
+      return res.send(JSON.stringify({ convenient_info: null }));
+    });
   }
 
-  getData().then(function (resolvedData) {
-    console.log(resolvedData);
-    return res.send(resolvedData);
-  });
+  //10초 이상 DB에서 데이터를 받아오지 못했을 때, 클라이언트쪽으로 'throw Error'라는 메시지 전송한다.
+  getData()
+    .then(function (resolvedData) {
+      return res.send(resolvedData);
+    }).catch(function (err) {
+      return res.send(JSON.stringify({ convenient_info: null }));
+    });
 }
 );
 
@@ -345,6 +376,7 @@ app.post('/pathConvenient', async (req, res) => {
     fetch(url, options)
       .then(res => res.json())
       .then((json) => {
+        console.log(`제이슨: ${json}`);
 
         const {
           properties: {
@@ -363,7 +395,6 @@ app.post('/pathConvenient', async (req, res) => {
         // return res.send(`${distance}m,${Math.round(time/60)}분`);
       })
       .catch(err => {
-        console.log("에러 ㅅㄱ");
         return res.send(JSON.stringify({ 'distance': null, 'time': null }))
       });
 
@@ -382,5 +413,35 @@ app.post('/findConvenient', (req, res) => {
   console.log(`find 2도착: ${curLat} ${curLng} ${destLat} ${destLng}`);
 
   return res.render("pathInfo.html", { lat: curLat, lng: curLng, tlat: destLat, tlng: destLng });
-  
+
+});
+
+
+app.post("/getfavitems", (req, res) => {
+  let { num } = req.body;
+  num = num.replace(" ", "");
+  console.log(`find 도착: ${num}`);
+
+  const params = [num, "%" + num + "%"];
+  try {
+    const selectQuery = db.query('SELECT * FROM building WHERE building_num = ? OR building_name LIKE ?; ', params,
+      (err, result, filed) => {
+        if (result == 0) {
+          return res.send(JSON.stringify({ 'num': null, 'name': null }));
+        }
+        if (err) {
+          return res.send(JSON.stringify({ 'num': null, 'name': null }));
+          console.log(err);
+        }
+        return result.map((found) => {
+          // console.log(found);
+          return res.send(JSON.stringify({ 'num': found.building_num, 'name': found.building_name }))
+        }
+        );
+      });
+  } catch {
+    (err) => {
+      return res.send(JSON.stringify({ 'num': null, 'name': null }));
+    };
+  }
 });
