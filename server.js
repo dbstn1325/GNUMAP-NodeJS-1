@@ -2,7 +2,6 @@ const express = require("express");
 const morgan = require("morgan");
 const logger = morgan("dev");
 const { render, name } = require("ejs");
-const PORT = 8000;
 const mysql = require("mysql2");
 const app = express();
 const fetch = require("node-fetch");
@@ -11,7 +10,9 @@ const { type } = require("os");
 const sort = require('sortjson');
 const { errorMonitor } = require("events");
 const { createBrotliDecompress } = require("zlib");
-const flash = require('connect-flash'); 
+const flash = require('connect-flash');
+
+const rootRouter = require('./src/routers/rootRouter');
 
 // view 경로 설정
 app.set("views", __dirname + "/src/views");
@@ -44,10 +45,12 @@ db.connect((err) => {
   console.log('db connected');
 });
 
-//서버 실행: npm run start
-app.listen(PORT, () => {
-  console.log(`listenling ${PORT}`);
-});
+
+
+app.use("/", rootRouter);
+
+
+
 
 
 //라우터 설정
@@ -421,3 +424,6 @@ app.post("/getfavitems", (req, res) => {
     };
   }
 });
+
+
+module.exports = app;
