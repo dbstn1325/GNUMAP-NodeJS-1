@@ -1,9 +1,9 @@
-const app = require("./server");
-const PORT = 6001;
-const session = require("express-session");
+const app = require("./server.js");
+
+const PORT = 8000;
 
 
 //서버 실행: npm run start
 app.listen(PORT, () => {
-  console.log(`listenling ${PORT}`);
-});
+    console.log(`listenling ${PORT}`);
+  });
