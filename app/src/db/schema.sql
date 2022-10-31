@@ -1,10 +1,8 @@
 CREATE TABLE building (
     building_num INT PRIMARY KEY,
     building_name VARCHAR(128) NOT NULL,
-    building_image TEXT NOT NULL,
-    building_info TEXT NOT NULL,
     building_lat TEXT NOT NULL,
-    building_lag TEXT NOT NULL
+    building_lag TEXT NOT NULL,
 );
 
 CREATE TABLE convenient (
@@ -47,3 +45,4 @@ CREATE TABLE search_history (
     FOREIGN KEY(user_id) REFERENCES user(user_id)
 );
 
+INSERT INTO BUILDING VALUES (30, "컴퓨터과학관", "35.1545202201429", "128.098324310217")
