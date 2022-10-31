@@ -64,9 +64,9 @@ app.post("/find", (req, res) => {
 
   let query = ``;
   if (num == parseInt(num)) {
-    query = `SELECT * FROM building WHERE building_num = ${num}`;
+    query = `SELECT * FROM building WHERE num = ${num}`;
   } else {
-    query = `SELECT * FROM building WHERE building_name LIKE "%${num}%"`;
+    query = `SELECT * FROM building WHERE name LIKE "%${num}%"`;
   }
 
   try {
@@ -82,8 +82,8 @@ app.post("/find", (req, res) => {
         res.render("pathInfo.html", {
           lat: lat,
           lng: lng,
-          tlat: found.building_lat,
-          tlng: found.building_lag,
+          tlat: found.lat,
+          tlng: found.lng,
         });
       });
     });
@@ -112,9 +112,9 @@ app.post("/getInfoBuilding", async (req, res) => {
   console.log(typeof num);
   let query = ``;
   if (num == parseInt(num)) {
-    query = `SELECT * FROM building WHERE building_num = ${num}`;
+    query = `SELECT * FROM building WHERE num = ${num}`;
   } else {
-    query = `SELECT * FROM building WHERE building_name LIKE "%${num}%"`;
+    query = `SELECT * FROM building WHERE name LIKE "%${num}%"`;
   }
 
   if (num.length > 10) {
@@ -129,6 +129,7 @@ app.post("/getInfoBuilding", async (req, res) => {
   function getData() {
     return new Promise(function (resolve, reject) {
       const selectQuery = db.query(query, (err, result, filed) => {
+        console.log(result);
         if (result == 0) {
           return res.send(
             `<script>
@@ -141,8 +142,8 @@ app.post("/getInfoBuilding", async (req, res) => {
           return console.log(err);
         }
         result.map((found) => {
-          destLat = found.building_lat;
-          destLng = found.building_lag;
+          destLat = found.lat;
+          destLng = found.lng;
           console.log(`출발지안: ${curLat}, ${curLng}`);
           console.log(`목적지안: ${destLat}, ${destLng}`);
         });
@@ -158,12 +159,50 @@ app.post("/getInfoBuilding", async (req, res) => {
     console.log(`목적지안: ${destLat}, ${destLng}`);
     const info = {};
     const url = "https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1";
+
+    //
+
+    // const options2 = {
+    //   method: "POST",
+    //   headers: {
+    //     accept: "application/json",
+    //     "content-type": "application/json",
+    //     appKey: "l7xx1317e6cad24d4f0d8048aa7336e5623b",
+    //   },
+    //   body: JSON.stringify({
+    //     startX: 126.92365493654832,
+    //     startY: 37.556770374096615,
+    //     angle: 20,
+    //     speed: 30,
+    //     endPoiId: "10001",
+    //     endX: 126.92432158129688,
+    //     endY: 37.55279861528311,
+    //     passList: "126.92774822,37.55395475_126.92577620,37.55337145",
+    //     reqCoordType: "WGS84GEO",
+    //     startName: "%EC%B6%9C%EB%B0%9C",
+    //     endName: "%EB%8F%84%EC%B0%A9",
+    //     searchOption: "0",
+    //     resCoordType: "WGS84GEO",
+    //     sort: "index",
+    //   }),
+    // };
+
+    // fetch(
+    //   "https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&callback=function",
+    //   options
+    // )
+    //   .then((response) => response.json())
+    //   .then((response) => console.log(response))
+    //   .catch((err) => console.error(err));
+
+    //
+
     const options = {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        appKey: "l7xxed2c734830ae4364975ef11e67a76e81",
+        appKey: "l7xx680a31160f3a4213ad53358d54e688f5",
       },
       body: JSON.stringify({
         angle: 0,
@@ -212,25 +251,20 @@ app.post("/getInfoBuilding", async (req, res) => {
 
 // 데이터를 가져와 정보 수정 요청 테이블에 넣는다.
 app.post("/getreviseInfo", async (req, res) => {
-  const {
-    building_num,
-    request_building_name,
-    request_building_location,
-    request_revise,
-  } = req.body;
-  console.log(building_num, request_building_name);
+  const { num, uilding_name, request_location, request_revise } = req.body;
+  console.log(num, uilding_name);
   try {
-    // const selectQuery = db.query('CREATE TABLE request (request_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT, building_num INT NOT NULL, request_buliding_name VARCHAR(128) NOT NULL, request_building_location TEXT NOT NULL, request_revise TEXT NOT NULL, FOREIGN KEY(building_num) REFERENCES building(building_num))',
+    // const selectQuery = db.query('CREATE TABLE request (request_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT, num INT NOT NULL, request_buliding_name VARCHAR(128) NOT NULL, request_location TEXT NOT NULL, request_revise TEXT NOT NULL, FOREIGN KEY(num) REFERENCES building(num))',
     const selectQuery = db.query(
-      `INSERT INTO request VALUES(NULL, '${request_building_name}', '${request_building_location}', '${request_revise}', '${building_num}')`,
+      `INSERT INTO request VALUES(NULL, '${uilding_name}', '${request_location}', '${request_revise}', '${num}')`,
       (err, result, filed) => {
         if (result == 0) {
           return res.send("error");
         }
         if (
-          request_building_name.length == 0 ||
-          building_num.length == 0 ||
-          request_building_location.length == 0 ||
+          uilding_name.length == 0 ||
+          num.length == 0 ||
+          request_location.length == 0 ||
           request_revise.length == 0
         ) {
           return res.send("error");
@@ -388,9 +422,9 @@ app.post("/getfavitems", (req, res) => {
   let query = ``;
   if (num == parseInt(num)) {
     console.log("int임");
-    query = `SELECT * FROM building WHERE building_num = ${num}`;
+    query = `SELECT * FROM building WHERE num = ${num}`;
   } else {
-    query = `SELECT * FROM building WHERE building_name LIKE "%${num}%"`;
+    query = `SELECT * FROM building WHERE name LIKE "%${num}%"`;
   }
   try {
     const selectQuery = db.query(query, params, (err, result, filed) => {
@@ -403,9 +437,7 @@ app.post("/getfavitems", (req, res) => {
       }
       return result.map((found) => {
         // console.log(found);
-        return res.send(
-          JSON.stringify({ num: found.building_num, name: found.building_name })
-        );
+        return res.send(JSON.stringify({ num: found.num, name: found.name }));
       });
     });
   } catch {
