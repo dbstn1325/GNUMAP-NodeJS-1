@@ -1,11 +1,5 @@
 version: "3.8"
 services:
-  db:
-    image: mysql
-    volumes:
-      - data:/data/db
-    env_file:
-      - ./env/mysql.env
   app:
     build: ./app
     ports:
@@ -14,8 +8,6 @@ services:
       - logs:/app/logs
       - ./app:/app
       - /app/node_modules
-    depends_on:
-      - db
 volumes:
   data:
   logs:
