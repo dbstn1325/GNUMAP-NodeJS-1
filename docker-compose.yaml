@@ -1,25 +1,21 @@
 version: "3.8"
 services:
-  mongodb:
-    image: 'mongo'
+  db:
+    image: mysql
     volumes:
       - data:/data/db
-    # environment:
-    #   MONGO_INITDB_ROOT_USERNAME: max
-    #   MONGO_INITDB_ROOT_PASSWORD: secret
-      # - MONGO_INITDB_ROOT_USERNAME=max
     env_file:
-      - ./env/mongo.env
+      - ./env/mysql.env
   app:
     build: ./app
     ports:
-      - '8000:8000'
+      - "8000:8000"
     volumes:
       - logs:/app/logs
       - ./app:/app
       - /app/node_modules
     depends_on:
-      - mongodb
+      - db
 volumes:
   data:
   logs:

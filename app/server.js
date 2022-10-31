@@ -30,9 +30,9 @@ app.use(morgan("dev"));
 
 // 데이터 베이스 설정, host 명은 mysql이 구동중인 컨테이너명을 입력한다.
 const db = mysql.createConnection({
-  host: "gnumap-mysql",
+  host: "db",
   user: "root",
-  password: "gnumappbl",
+  password: "gnumap5607",
   database: "gnumap",
 });
 
