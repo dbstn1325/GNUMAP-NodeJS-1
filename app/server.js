@@ -251,28 +251,16 @@ app.post("/getreviseInfo", async (req, res) => {
 
 // 편의시설 정보를 가져옴
 app.post("/getInfoConvenient", async (req, res) => {
-  let { curLat, curLng, number } = req.body;
+  let { curLat, curLng, category } = req.body;
 
-  console.log(`hi${curLat}`, curLng, number);
+  console.log(`hi${curLat}`, curLng);
   let convenient_info = [];
   let convenient_length = 0;
-  const convenientCategory = {
-    0: "편의점",
-    1: "ATM",
-    2: "우체국",
-    3: "문구점",
-    4: "운동",
-    5: "딸기방",
-    6: "식당",
-    7: "프린터",
-    8: "카페",
-    9: "헌혈의집",
-  };
 
   function getData() {
     return new Promise(function (resolve, reject) {
       const selectQuery = db.query(
-        `SELECT * FROM convenient WHERE category = "${convenientCategory[number]}" `,
+        `SELECT * FROM convenient WHERE category = ${category} `,
         async (err, result, filed) => {
           if (result == 0) {
             return res.send("error");

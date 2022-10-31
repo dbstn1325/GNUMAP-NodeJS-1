@@ -1,48 +1,30 @@
 CREATE TABLE building (
-    building_num INT PRIMARY KEY,
-    building_name VARCHAR(128) NOT NULL,
-    building_lat TEXT NOT NULL,
-    building_lag TEXT NOT NULL,
+    num INT,
+    name VARCHAR(128) NOT NULL,
+    lat DECIMAL(25,20) NOT NULL,
+    lng DECIMAL(25,20) NOT NULL,
 );
 
 CREATE TABLE convenient (
-    convenient_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    convenient_name VARCHAR(30) NOT NULL,
-    convenient_image VARCHAR(255) NOT NULL,
-    convenient_phone VARCHAR(15) NOT NULL,
-    convenient_lat DECIMAL(25,20) NOT NULL,
-    convenient_lng DECIMAL(25,20) NOT NULL,
+    name VARCHAR(30) NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    lat DECIMAL(25,20) NOT NULL,
+    lng DECIMAL(25,20) NOT NULL,
+    open VARCHAR(15) NOT NULL,
+    close VARCHAR(15) NOT NULL,
     category VARCHAR(10) NOT NULL,
 );
 
-CREATE TABLE request (
-    request_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    building_num INT NOT NULL,
-    request_buliding_name VARCHAR(128) NOT NULL,
-    request_building_location TEXT NOT NULL,
-    request_revise TEXT NOT NULL,
-    FOREIGN KEY(building_num) REFERENCES building(building_num)
+CREATE TABLE revise (
+    title VARCHAR(100) NOT NULL,
+    body VARCHAR(500) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -------------------
-CREATE TABLE user (
-    user_id INT PRIMARY KEY NOT NULL
-);
 
-CREATE TABLE likes (
-    likes_id INT PRIMARY KEY NOT NULL,
-    building_num INT NOT NULL,
-    status CHAR(1) NOT NULL,
-    FOREIGN KEY(building_num) REFERENCES building(building_num),
-    FOREIGN KEY(user_id) REFERENCES user(user_id)
-    FOREIGN KEY(convenient_id) REFERENCES convenient(convenient_id),
-);
 
-CREATE TABLE search_history (
-    history_id INT PRIMARY KEY NOT NULL,
-    history_contents VARCHAR(45) NOT NULL,
-    isDeleted CHAR(1) NOT NULL,
-    FOREIGN KEY(user_id) REFERENCES user(user_id)
-);
+INSERT INTO building VALUES (30, "컴퓨터과학관", "35.1545202201429", "128.098324310217")
 
-INSERT INTO BUILDING VALUES (30, "컴퓨터과학관", "35.1545202201429", "128.098324310217")
+INSERT INTO convenient VALUES("CU 경상대 공학관점", "055-753-7830", "35.1583645623225", "128.09978350749392", "09:00", "24:00", "편의점")
+INSERT INTO convenient VALUES("CU 경상대 느티마루점", "055-772-0955", "35.15067463020352", "128.09799553889857", "09:00", "18:30", "편의점")
